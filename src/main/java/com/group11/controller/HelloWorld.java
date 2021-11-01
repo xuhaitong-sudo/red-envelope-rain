@@ -12,6 +12,6 @@ public class HelloWorld {
 
     @RequestMapping("/hello")
     public String hello() {
-        return "如果你看到这条信息，说明你的容器运行成功";
+        return "如果你看到这条信息，说明你的流水线自动触发成功了";
     }
 }
