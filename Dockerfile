@@ -1,5 +1,5 @@
 FROM java:8
-COPY *.jar /root/server/app.jar
+COPY *.jar app.jar
 CMD ["--server.port=8080"]
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/root/server/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
