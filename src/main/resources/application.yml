@@ -1,0 +1,29 @@
+# 配置数据库
+spring:
+  datasource:
+    username: group11
+    password: Hongbaoyugroup11
+    url: jdbc:mysql://rdsmysqlh45997815b4c28c6b.rds.volces.com:3306/red-envelope-rain?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
+
+# 后端服务端口
+server:
+  port: 8080
+
+
+
+# 开启 MyBatis 打印 sql 日志
+logging:
+  level:
+    com.group11: debug
+
+# 红包雨的配置
+diyconfig:
+  maxCount: 10
+  probability: 0.5
+  maxAmount: 1000
+  maxEnvelopeCount: 100
+  lowerLimitAmount: 1
+  upperLimitAmount: 20
