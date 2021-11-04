@@ -11,9 +11,7 @@ spring:
 
 # 后端服务端口
 server:
-  port: 8081
-  tomcat:
-    relaxed-query-chars: "{,},[,],\,^"  # 解决 Error parsing HTTP request header 问题
+  port: 8080
 
 # 开启 MyBatis 打印 sql 日志
 logging:
