@@ -5,6 +5,7 @@ import com.group11.pojo.dto.Envelope;
 import com.group11.pojo.vo.GetWalletListResponse;
 import com.group11.pojo.vo.OpenResponse;
 import com.group11.pojo.vo.SnatchResponse;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +20,12 @@ import java.util.Random;
  */
 @RestController
 public class Controller {
+
+    @GetMapping("/")
+    public String hello() {
+        return "服务成功启动";
+    }
+
 
     @PostMapping("/snatch")
     public R snatch(@RequestParam("uid") Long uid) {
