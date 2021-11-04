@@ -5,7 +5,10 @@ import com.group11.pojo.dto.Envelope;
 import com.group11.pojo.vo.GetWalletListResponse;
 import com.group11.pojo.vo.OpenResponse;
 import com.group11.pojo.vo.SnatchResponse;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +24,9 @@ import java.util.Random;
 public class Controller1 {
     @PostMapping("/snatch")
     public R snatch(@RequestBody Map<String, String> json) {
-        System.out.println("接受到的 uid 是 ：" + json.get("uid"));
+        Long uid = Long.parseLong(json.get("uid"));
+        Long envelopeId = Long.parseLong(json.get("envelope_id"));
+        System.out.println("接受到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
 
         Random random = new Random();
         SnatchResponse response = new SnatchResponse(123L, 5L, (long) random.nextInt(1000));
@@ -40,7 +45,9 @@ public class Controller1 {
 
     @PostMapping("/get_wallet_list")
     public R getWalletList(@RequestBody Map<String, String> json) {
-        System.out.println("接受到的 uid 是 ：" + json.get("uid"));
+        Long uid = Long.parseLong(json.get("uid"));
+        Long envelopeId = Long.parseLong(json.get("envelope_id"));
+        System.out.println("接受到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
 
         Random random = new Random();
         List<Envelope> list = new ArrayList<>();

@@ -8,11 +8,12 @@ spring:
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 
+
 # 后端服务端口
 server:
-  port: 8080
-
-
+  port: 8081
+  tomcat:
+    max-http-form-post-size: 20000  # 设置 tomcat 接受 http header 的大小上限
 
 # 开启 MyBatis 打印 sql 日志
 logging:
