@@ -1,10 +1,13 @@
-# 配置数据库
 spring:
   datasource:
     username: group11
     password: Hongbaoyugroup11
     url: jdbc:mysql://rdsmysqlh45997815b4c28c6b.rds.volces.com:3306/red-envelope-rain?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
     driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    host: redis-cn02s9iq47d3t41bs.redis.volces.com
+    port: 6379
+    password: Hongbaoyugroup11
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 
