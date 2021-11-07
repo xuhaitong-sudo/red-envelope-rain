@@ -5,11 +5,16 @@ spring:
     url: jdbc:mysql://rdsmysqlh45997815b4c28c6b.rds.volces.com:3306/red-envelope-rain?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    host: redis-cn02s9iq47d3t41bs.redis.volces.com
+    host: 47.111.171.173  # 暂时使用云服务的 Redis 服务端测试
     port: 6379
-    password: Hongbaoyugroup11
+  #    password: Hongbaoyugroup11
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
+
+rocketmq:
+  nameServer: 47.111.171.173:9876
+  producer:
+    group: group11
 
 
 # 后端服务端口

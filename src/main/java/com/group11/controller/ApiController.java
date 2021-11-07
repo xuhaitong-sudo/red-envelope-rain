@@ -5,10 +5,8 @@ import com.group11.pojo.dto.Envelope;
 import com.group11.pojo.vo.GetWalletListResponse;
 import com.group11.pojo.vo.OpenResponse;
 import com.group11.pojo.vo.SnatchResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +18,9 @@ import java.util.Random;
  * @since 2021/11/3 13:31
  */
 @RestController
-public class Controller {
+@Slf4j
+@RequestMapping("/api")
+public class ApiController {
 
     @GetMapping("/")
     public String hello() {
@@ -32,7 +32,7 @@ public class Controller {
     public R snatch(@RequestBody Map<String, String> json) {
         Long uid = Long.parseLong(json.get("uid"));
         Long envelopeId = Long.parseLong(json.get("envelope_id"));
-        System.out.println("抢红包接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
+        log.info("抢红包接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
 
         Random random = new Random();
         SnatchResponse response = new SnatchResponse(123L, 5L, (long) random.nextInt(1000));
@@ -44,7 +44,7 @@ public class Controller {
     public R open(@RequestBody Map<String, String> json) {
         Long uid = Long.parseLong(json.get("uid"));
         Long envelopeId = Long.parseLong(json.get("envelope_id"));
-        System.out.println("开红包接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
+        log.info("开红包接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
 
         Random random = new Random();
         return R.ok().put("data", new OpenResponse((long) random.nextInt(1000)));
@@ -55,7 +55,7 @@ public class Controller {
     public R getWalletList(@RequestBody Map<String, String> json) {
         Long uid = Long.parseLong(json.get("uid"));
         Long envelopeId = Long.parseLong(json.get("envelope_id"));
-        System.out.println("获取钱包列表接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
+        log.info("获取钱包列表接收到的 uid, envelopeId 是 ：" + uid + ", " + envelopeId);
 
         Random random = new Random();
         List<Envelope> list = new ArrayList<>();
