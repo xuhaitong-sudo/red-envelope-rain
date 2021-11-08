@@ -10,7 +10,9 @@ public enum ErrorCodeEume {
 
     INVALID_UID(1, "uid 无效"),
     MAX_COUNT(2, "用户已达到最大抢到红包次数"),
-    INVALID_ENVELOPE_ID(3, "红包不存在");
+    FAILURE_SNATCH(3, "未抢到红包"),
+    SOLD_OUT(4, "红包发光了"),
+    INVALID_ENVELOPE_ID(5, "红包不存在");
 
     private int code;
     private String msg;

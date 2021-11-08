@@ -13,7 +13,7 @@ spring:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 
 rocketmq:
-  nameServer: 47.111.171.173:9876   # 控制面板 47.111.171.173:8001，rocketmq 太吃内存了，云服务器太卡了暂时关掉
+  nameServer: 47.111.171.173:9876   # 控制面板 47.111.171.173:8001
   producer:
     group: group11
 
