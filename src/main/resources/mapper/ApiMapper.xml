@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.group11.dao.ApiDao">
+
+    <insert id="createEnvelope">
+        insert into t_envelope (envelope_id, uid, `value`, snatch_time)
+        values (#{envelopeId}, #{uid}, #{value}, #{snatchTime})
+    </insert>
+
+    <update id="openEnvelope">
+        update t_envelope
+        set opened = 1
+        where envelope_id = #{envelopeId}
+    </update>
+
+    <update id="updateUserAmount">
+        update t_user
+        set amount = amount + #{value}
+        where uid = #{uid}
+    </update>
+
+    <select id="selectUserAmout" resultType="java.lang.Long">
+        select amount
+        from t_user
+        where uid = #{uid}
+    </select>
+    <select id="selectEnvelopes" resultType="com.group11.pojo.dto.Envelope">
+        select envelope_id                                 as envelopeId,
+               case opened when 0 then null else value end as value,
+               opened                                      as opened,
+               snatch_time                                 as snatchTime
+        from t_envelope
+        where uid = #{uid}
+    </select>
+
+</mapper>
