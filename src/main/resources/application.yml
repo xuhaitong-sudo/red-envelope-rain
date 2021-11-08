@@ -4,10 +4,11 @@ spring:
     password: Hongbaoyugroup11
     url: jdbc:mysql://rdsmysqlh45997815b4c28c6b.rds.volces.com:3306/red-envelope-rain?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8
     driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
   redis:
-    host: 47.111.171.173  # 暂时使用云服务的 Redis 服务端测试
+    host: redis-cn02s9iq47d3t41bs.redis.volces.com
     port: 6379
-  #    password: Hongbaoyugroup11
+    password: Hongbaoyugroup11
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 
@@ -25,6 +26,9 @@ server:
 logging:
   level:
     com.group11: debug
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
 
 # 红包雨的配置，已经上传到配置中心了这里就不需要配置
 #diyconfig:

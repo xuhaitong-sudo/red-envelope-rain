@@ -1,10 +1,10 @@
 package com.group11;
 
-import org.mybatis.spring.annotation.MapperScan;
+import com.group11.common.utils.Warmup;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@MapperScan("com.group11.dao")
 @SpringBootApplication
 public class RedEnvelopeDemoApplication {
 

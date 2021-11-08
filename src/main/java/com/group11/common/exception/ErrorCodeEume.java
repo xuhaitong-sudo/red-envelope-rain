@@ -9,7 +9,7 @@ package com.group11.common.exception;
 public enum ErrorCodeEume {
 
     INVALID_UID(1, "uid 无效"),
-    MAX_COUNT(2, "用户已达到最大抢红包次数"),
+    MAX_COUNT(2, "用户已达到最大抢到红包次数"),
     INVALID_ENVELOPE_ID(3, "红包不存在");
 
     private int code;

@@ -1,9 +1,8 @@
-# \u914D\u7F6E nacos \u52A8\u6001\u5237\u65B0\u914D\u7F6E
 spring:
   application:
     name: group11
   cloud:
     nacos:
       config:
-        server-addr: 47.111.171.173:8848  # \u63A7\u5236\u9762\u677F 47.111.171.173:8848/nacos
-        file-extension: yaml  # \u8BFB\u53D6 group11.yaml \u914D\u7F6E\u4FE1\u606F
+        server-addr: 47.111.171.173:8848
+        file-extension: yaml

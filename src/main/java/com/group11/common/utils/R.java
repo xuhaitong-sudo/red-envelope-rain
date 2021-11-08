@@ -1,5 +1,6 @@
 package com.group11.common.utils;
 
+import com.group11.common.exception.ErrorCodeEume;
 import org.apache.http.HttpStatus;
 
 import java.util.HashMap;
@@ -22,6 +23,13 @@ public class R extends HashMap<String, Object> {
         R r = new R();
         r.put("code", code);
         r.put("msg", msg);
+        return r;
+    }
+
+    public static R error(ErrorCodeEume errorCodeEume){
+        R r = new R();
+        r.put("code", errorCodeEume.getCode());
+        r.put("msg", errorCodeEume.getMsg());
         return r;
     }
 
