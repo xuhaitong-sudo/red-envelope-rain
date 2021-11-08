@@ -1,6 +1,6 @@
 package com.group11.service;
 
-import com.group11.pojo.dto.Envelope;
+import com.group11.pojo.dto.EnvelopeWithoutUid;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -24,5 +24,5 @@ public interface ApiService {
     Long selectUserAmout(@Param("uid") Long uid);
 
     // 查询总金额和红包列表：查询红包表中 uid 对应的所有红包
-    List<Envelope> selectEnvelopes(@Param("uid") Long uid);
+    List<EnvelopeWithoutUid> selectEnvelopes(@Param("uid") Long uid);
 }

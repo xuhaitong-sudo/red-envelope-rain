@@ -1,6 +1,6 @@
 package com.group11.dao;
 
-import com.group11.pojo.dto.Envelope;
+import com.group11.pojo.dto.EnvelopeWithoutUid;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -22,5 +22,5 @@ public interface ApiDao {
 
     Long selectUserAmout(@Param("uid") Long uid);
 
-    List<Envelope> selectEnvelopes(@Param("uid") Long uid);
+    List<EnvelopeWithoutUid> selectEnvelopes(@Param("uid") Long uid);
 }

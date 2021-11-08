@@ -1,7 +1,7 @@
 package com.group11;
 
 import com.group11.common.config.DiyConfig;
-import com.group11.pojo.dto.Envelope;
+import com.group11.pojo.dto.EnvelopeWithoutUid;
 import com.group11.service.ApiService;
 import com.group11.service.WarmUpService;
 import org.junit.Test;
@@ -61,9 +61,9 @@ public class RedEnvelopeDemoApplicationTests {
 //        System.out.println("t3 " + t3);
         Long t4 = apiService.selectUserAmout(1L);
         System.out.println(t4);
-        List<Envelope> envelopeList = apiService.selectEnvelopes(1L);
-        for (Envelope envelope : envelopeList) {
-            System.out.println(envelope);
+        List<EnvelopeWithoutUid> envelopeWithoutUidList = apiService.selectEnvelopes(1L);
+        for (EnvelopeWithoutUid envelopeWithoutUid : envelopeWithoutUidList) {
+            System.out.println(envelopeWithoutUid);
         }
     }
 

@@ -24,7 +24,7 @@
         from t_user
         where uid = #{uid}
     </select>
-    <select id="selectEnvelopes" resultType="com.group11.pojo.dto.Envelope">
+    <select id="selectEnvelopes" resultType="com.group11.pojo.dto.EnvelopeWithoutUid">
         select envelope_id                                 as envelopeId,
                case opened when 0 then null else value end as value,
                opened                                      as opened,

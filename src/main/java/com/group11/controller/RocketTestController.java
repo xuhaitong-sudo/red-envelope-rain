@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * @since 2021/11/7 16:21
  */
 @RestController
-public class RocketController {
+public class RocketTestController {
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
 

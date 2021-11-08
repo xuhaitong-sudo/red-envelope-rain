@@ -1,7 +1,7 @@
 package com.group11.service.impl;
 
 import com.group11.dao.ApiDao;
-import com.group11.pojo.dto.Envelope;
+import com.group11.pojo.dto.EnvelopeWithoutUid;
 import com.group11.service.ApiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,7 +39,7 @@ public class APiServiceImpl implements ApiService {
     }
 
     @Override
-    public List<Envelope> selectEnvelopes(Long uid) {
+    public List<EnvelopeWithoutUid> selectEnvelopes(Long uid) {
         return apiDao.selectEnvelopes(uid);
     }
 }

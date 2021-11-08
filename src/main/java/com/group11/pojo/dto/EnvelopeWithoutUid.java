@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Envelope {
+public class EnvelopeWithoutUid {
     @JsonProperty("envelope_id")
     Long envelopeId;
 

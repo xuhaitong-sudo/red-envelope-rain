@@ -34,16 +34,29 @@ public class Warmup {
         return ThreadLocalRandom.current().nextLong(startTime, startTime + lastTime + 1);
     }
 
+    void clear(String key) {
+        if (redisTemplate.hasKey(key)) {
+            redisTemplate.delete(key);
+        }
+    }
+
     @PostConstruct  // 使用 @PostConstruct 在 web 服务启动前进行预热
     public void warmup() {
+        clear("uid_set");
+        clear("global_envelope_id");
+        clear("snatch_time_bucket");
+
         // 1. 所有 uid 存入一个 set
         List<Long> uidList = warmUpService.selectAllUsers();
         for (Long uid : uidList) {
             redisTemplate.opsForSet().add("uid_set", uid);
         }
 
-        // 2. 创建一个全局唯一的 envelope_id，初始化为 1，每次成功抢到红包加 1
-        redisTemplate.opsForValue().set("global_envelope_id", 1);
+//        // 2. 创建全局唯一的 envelope_id，初始化为 1，每次成功抢到红包加 1
+//        if (redisTemplate.hasKey("global_envelope_id")) {
+//            redisTemplate.delete("global_envelope_id");
+//        }
+//        redisTemplate.opsForValue().set("global_envelope_id", String.valueOf(1L));
 
         // 3. 根据动态配置预先生成时间戳，然后 rpush 进 Redis 的 List 当令牌（提示：只有总金额会变化，红包个数不会发生变化）
         List<Long> snatchTimeList = new ArrayList<>();
@@ -51,6 +64,9 @@ public class Warmup {
             snatchTimeList.add(randomSnatchTime(diyConfig.getStartTime()));
         }
         Collections.sort(snatchTimeList);
+        if (redisTemplate.hasKey("snatch_time_bucket")) {
+            redisTemplate.delete("snatch_time_bucket");
+        }
         for (Long snatchTime : snatchTimeList) {
             redisTemplate.opsForList().rightPush("snatch_time_bucket", snatchTime);
         }

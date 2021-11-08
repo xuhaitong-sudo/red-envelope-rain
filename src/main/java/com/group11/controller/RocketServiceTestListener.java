@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Component
 @Slf4j
-public class RocketServiceListener {
+public class RocketServiceTestListener {
 
     @Service
     @RocketMQMessageListener(consumerGroup = "consumer-group-1", topic = "rocket-topic-1")
@@ -21,7 +21,7 @@ public class RocketServiceListener {
         }
     }
 
-    // RocketMQ支持两种消费方式，集器消费和广播消费
+    // RocketMQ支持两种消费方式，集群消费和广播消费
     @Service
     @RocketMQMessageListener(consumerGroup = "consumer-group-2", topic = "rocket-topic-1",
             selectorExpression = "tag2", messageModel = MessageModel.BROADCASTING)
