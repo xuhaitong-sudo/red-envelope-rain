@@ -12,7 +12,7 @@ public enum ErrorCodeEume {
     MAX_COUNT(2, "用户已达到最大抢到红包次数"),
     FAILURE_SNATCH(3, "未抢到红包"),
     SOLD_OUT(4, "红包发光了"),
-    INVALID_ENVELOPE_ID(5, "红包不存在");
+    ENVELOPE_NOT_EXIST(5, "红包不存在");
 
     private int code;
     private String msg;

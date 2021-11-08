@@ -1,6 +1,7 @@
 package com.group11.controller;
 
 import com.group11.pojo.dto.EnvelopeWithoutOpened;
+import com.group11.pojo.dto.EnvelopeWithoutOpenedAndSnatchTime;
 import com.group11.service.ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -25,7 +26,7 @@ public class ConsumerController {
     RedisTemplate<String, Object> redisTemplate;
 
     @Service
-    @RocketMQMessageListener(consumerGroup = "group11", topic = "snatch-queue")
+    @RocketMQMessageListener(consumerGroup = "group1", topic = "snatch-queue")
     public class SnatchConsumer implements RocketMQListener<EnvelopeWithoutOpened> {
 
         @Override
@@ -33,6 +34,19 @@ public class ConsumerController {
             log.info("SnatchConsumer ==> " + message);
             apiService.createEnvelope(message.getEnvelopeId(), message.getUid(), message.getValue(), message.getSnatchTime());
             redisTemplate.opsForHash().increment(message.getUid() + "_uid_hash", "finished_count", 1L);
+        }
+    }
+
+    @Service
+    @RocketMQMessageListener(consumerGroup = "group2", topic = "open-queue")
+    public class OpenConsumer implements RocketMQListener<EnvelopeWithoutOpenedAndSnatchTime> {
+
+        @Override
+        public void onMessage(EnvelopeWithoutOpenedAndSnatchTime message) {
+            log.info("OpenConsumer ==> " + message);
+            apiService.openEnvelope(message.getEnvelopeId());
+            apiService.updateUserAmount(message.getUid(), message.getValue());
+            redisTemplate.opsForHash().increment(message.getUid() + "_uid_hash", "finished_amount", message.getValue());
         }
     }
 }

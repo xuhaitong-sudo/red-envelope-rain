@@ -5,6 +5,7 @@ import com.group11.common.exception.ErrorCodeEume;
 import com.group11.common.utils.R;
 import com.group11.common.utils.RandomEnvelopeAmountList;
 import com.group11.pojo.dto.EnvelopeWithoutOpened;
+import com.group11.pojo.dto.EnvelopeWithoutOpenedAndSnatchTime;
 import com.group11.pojo.dto.EnvelopeWithoutUid;
 import com.group11.pojo.vo.GetWalletListResponse;
 import com.group11.pojo.vo.OpenResponse;
@@ -26,6 +27,7 @@ import java.util.*;
 @Slf4j
 @RequestMapping("/api")
 public class ApiController {
+    // TODO 这变量是不是应该放在 Redis 里
     // 全局变量
     Long globalEnvelopeId = 0L;
     Long sentAmout = 0L;
@@ -57,8 +59,8 @@ public class ApiController {
             return R.error(ErrorCodeEume.MAX_COUNT).put("data", null);                           // 当前用户已达最大抢到红包次数
         }
 
-        Long currTime = new Date().getTime() / 1000L;
-        List<String> keys = Arrays.asList(currTime.toString());
+        long currTime = new Date().getTime() / 1000L;
+        List<String> keys = Arrays.asList(String.valueOf(currTime));
         long compareResult = redisTemplate.execute(redisScript, keys);  // lua 脚本保证原子化操作
         // -1：未抢到红包，-2：没有红包了，正数：抢到的红包返回的时间戳
         if (compareResult == -1L) {
@@ -69,7 +71,7 @@ public class ApiController {
         }
         globalEnvelopeId++;
 
-        // 发送给消息队列
+        // 发送给主题为 snatch-queue 的消息队列
         Long randomEnvelopeValue = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
                 diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), sentAmout, sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
         EnvelopeWithoutOpened envelope = new EnvelopeWithoutOpened(globalEnvelopeId, uid, randomEnvelopeValue, compareResult);
@@ -104,8 +106,15 @@ public class ApiController {
         long envelopeId = Long.parseLong(json.get("envelope_id"));
         log.info("开红包 ==> uid: " + uid + ", envelope_id: " + envelopeId);
 
-        Random random = new Random();
-        return R.ok().put("data", new OpenResponse((long) random.nextInt(1000)));
+        // TODO 这里的返回值应该是 Long 的，但是会报错，所以改成了 Integer 进行比较
+        if (!redisTemplate.hasKey(envelopeId + "_envelope_id_hash") || !(uid == (Integer) redisTemplate.opsForHash().get(envelopeId + "_envelope_id_hash", "uid"))) {
+            return R.error(ErrorCodeEume.ENVELOPE_NOT_EXIST).put("data", null);
+        }
+        // TODO 这里的返回值应该是 Long 的，但是会报错，所以改成了 Integer
+        Integer value = (int) redisTemplate.opsForHash().get(envelopeId + "_envelope_id_hash", "value");
+        rocketMQTemplate.convertAndSend("open-queue", new EnvelopeWithoutOpenedAndSnatchTime(envelopeId, uid, Long.parseLong(value.toString())));
+        redisTemplate.delete(envelopeId + "_envelope_id_hash");
+        return R.ok().put("data", new OpenResponse(Long.parseLong(value.toString())));
     }
 
 
