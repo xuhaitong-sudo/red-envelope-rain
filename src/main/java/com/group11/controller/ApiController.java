@@ -55,16 +55,16 @@ public class ApiController {
         long uid = Long.parseLong(json.get("uid"));
         log.info("抢红包 ==> uid: " + uid);
 
-        Random random = new Random();
-        if (random.nextInt(100) + 1 > 100 * diyConfig.getProbability()) {
-            return R.error(ErrorCodeEume.FAILURE_SNATCH).put("data", null);
-        }
-
-        if (!redisTemplate.opsForSet().isMember("uid_set", uid)) {                          // 当前 uid 不存在 uid_set 中
+        if (!redisTemplate.opsForSet().isMember("uid_set", "u_" + uid)) {                          // 当前 uid 不存在 uid_set 中
             if (!redisTemplate.hasKey("u_" + uid)) {                                             // 当前 uid 不存在一个 hash 对应
                 return R.error(ErrorCodeEume.INVALID_UID).put("data", null);
             }
             return R.error(ErrorCodeEume.MAX_COUNT).put("data", null);                           // 当前用户已达最大抢到红包次数
+        }
+
+        Random random = new Random();
+        if (random.nextInt(100) + 1 > 100 * diyConfig.getProbability()) {
+            return R.error(ErrorCodeEume.FAILURE_SNATCH).put("data", null);
         }
 
         long currTime = new Date().getTime() / 1000L;

@@ -72,7 +72,7 @@ public class Warmup {
         // 1. 所有 uid 存入一个 set
         List<Long> uidList = warmUpService.selectAllUsers();
         for (Long uid : uidList) {
-            redisTemplate.opsForSet().add("uid_set", uid);
+            redisTemplate.opsForSet().add("uid_set", "u_" + uid);
         }
 
         // 2. 三个全局变量
@@ -87,9 +87,6 @@ public class Warmup {
             snatchTimeList.add(randomSnatchTime(diyConfig.getStartTime()));
         }
         Collections.sort(snatchTimeList);
-        if (redisTemplate.hasKey("snatch_time_bucket")) {
-            redisTemplate.delete("snatch_time_bucket");
-        }
         for (Long snatchTime : snatchTimeList) {
             redisTemplate.opsForList().rightPush("snatch_time_bucket", snatchTime);
         }
