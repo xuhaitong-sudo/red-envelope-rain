@@ -20,4 +20,19 @@ public class WarmUpServiceImpl implements WarmUpService {
     public List<Long> selectAllUsers() {
         return warmUpDao.selectAllUsers();
     }
+
+    @Override
+    public int truncateUserTable() {
+        return warmUpDao.truncateUserTable();
+    }
+
+    @Override
+    public int truncateEnvelopeTable() {
+        return warmUpDao.truncateEnvelopeTable();
+    }
+
+    @Override
+    public int insertOneRowIntoEnvelopeTable(Long uid) {
+        return warmUpDao.insertOneRowIntoEnvelopeTable(uid);
+    }
 }

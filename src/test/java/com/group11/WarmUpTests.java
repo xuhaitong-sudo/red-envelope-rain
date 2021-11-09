@@ -21,4 +21,9 @@ public class WarmUpTests {
     public void selectUidList() {
         warmup.warmup();
     }
+
+    @Test
+    public void deleteAllKeys() {
+        warmup.redisInit();
+    }
 }

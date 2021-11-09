@@ -3,6 +3,20 @@
 <mapper namespace="com.group11.dao.WarmUpDao">
 
     <select id="selectAllUsers" resultType="java.lang.Long">
-        select uid from t_user;
+        select uid
+        from t_user;
     </select>
+
+    <update id="truncateUserTable">
+        truncate table t_user;
+    </update>
+
+    <update id="truncateEnvelopeTable">
+        truncate table t_envelope;
+    </update>
+
+    <insert id="insertOneRowIntoEnvelopeTable">
+        insert into t_user (uid)
+        values (#{uid});
+    </insert>
 </mapper>

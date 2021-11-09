@@ -24,8 +24,8 @@ public class RedisTemplateTests {
     }
 
     @Test
-    public void hasKeyTest(){
-        Boolean res = redisTemplate.hasKey("12_uid_hash");
+    public void hasKeyTest() {
+        Boolean res = redisTemplate.hasKey("u_12");
         System.out.println(res);
     }
 

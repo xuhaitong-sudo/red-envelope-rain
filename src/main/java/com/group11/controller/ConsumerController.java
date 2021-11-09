@@ -26,27 +26,29 @@ public class ConsumerController {
     RedisTemplate<String, Object> redisTemplate;
 
     @Service
-    @RocketMQMessageListener(consumerGroup = "group1", topic = "snatch-queue")
+    @RocketMQMessageListener(consumerGroup = "GID_snatch", topic = "snatch-queue")
     public class SnatchConsumer implements RocketMQListener<EnvelopeWithoutOpened> {
 
         @Override
         public void onMessage(EnvelopeWithoutOpened message) {
             log.info("SnatchConsumer ==> " + message);
+            // TODO 如何保证写入数据库成功
             apiService.createEnvelope(message.getEnvelopeId(), message.getUid(), message.getValue(), message.getSnatchTime());
-            redisTemplate.opsForHash().increment(message.getUid() + "_uid_hash", "finished_count", 1L);
+            redisTemplate.opsForHash().increment("u_" + message.getUid(), "finished_count", 1L);
         }
     }
 
     @Service
-    @RocketMQMessageListener(consumerGroup = "group2", topic = "open-queue")
+    @RocketMQMessageListener(consumerGroup = "GID_open", topic = "open-queue")
     public class OpenConsumer implements RocketMQListener<EnvelopeWithoutOpenedAndSnatchTime> {
 
         @Override
         public void onMessage(EnvelopeWithoutOpenedAndSnatchTime message) {
             log.info("OpenConsumer ==> " + message);
+            // TODO 如何保证写入数据库成功
             apiService.openEnvelope(message.getEnvelopeId());
             apiService.updateUserAmount(message.getUid(), message.getValue());
-            redisTemplate.opsForHash().increment(message.getUid() + "_uid_hash", "finished_amount", message.getValue());
+            redisTemplate.opsForHash().increment("u_" + message.getUid(), "finished_amount", message.getValue());
         }
     }
 }

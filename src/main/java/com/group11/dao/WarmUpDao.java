@@ -1,6 +1,7 @@
 package com.group11.dao;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,4 +14,10 @@ import java.util.List;
 @Mapper
 public interface WarmUpDao {
     List<Long> selectAllUsers();
+
+    int truncateUserTable();
+
+    int truncateEnvelopeTable();
+
+    int insertOneRowIntoEnvelopeTable(@Param("uid")Long uid);
 }

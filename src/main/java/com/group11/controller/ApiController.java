@@ -1,5 +1,6 @@
 package com.group11.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.group11.common.config.DiyConfig;
 import com.group11.common.exception.ErrorCodeEume;
 import com.group11.common.utils.R;
@@ -10,8 +11,11 @@ import com.group11.pojo.dto.EnvelopeWithoutUid;
 import com.group11.pojo.vo.GetWalletListResponse;
 import com.group11.pojo.vo.OpenResponse;
 import com.group11.pojo.vo.SnatchResponse;
+import com.group11.service.ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -27,19 +31,18 @@ import java.util.*;
 @Slf4j
 @RequestMapping("/api")
 public class ApiController {
-    // TODO 这变量是不是应该放在 Redis 里
-    // 全局变量
-    Long globalEnvelopeId = 0L;
-    Long sentAmout = 0L;
-    Long sentEnvelopeCount = 0L;
     @Autowired
     DiyConfig diyConfig;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
+    private RedissonClient redissonClient;
+    @Autowired
     private DefaultRedisScript<Long> redisScript;
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private ApiService apiService;
 
     @GetMapping("/hello")
     public String hello() {
@@ -52,8 +55,13 @@ public class ApiController {
         long uid = Long.parseLong(json.get("uid"));
         log.info("抢红包 ==> uid: " + uid);
 
+        Random random = new Random();
+        if (random.nextInt(100) + 1 > 100 * diyConfig.getProbability()) {
+            return R.error(ErrorCodeEume.FAILURE_SNATCH).put("data", null);
+        }
+
         if (!redisTemplate.opsForSet().isMember("uid_set", uid)) {                          // 当前 uid 不存在 uid_set 中
-            if (!redisTemplate.hasKey(uid + "_uid_hash")) {                                      // 当前 uid 不存在一个 hash 对应
+            if (!redisTemplate.hasKey("u_" + uid)) {                                             // 当前 uid 不存在一个 hash 对应
                 return R.error(ErrorCodeEume.INVALID_UID).put("data", null);
             }
             return R.error(ErrorCodeEume.MAX_COUNT).put("data", null);                           // 当前用户已达最大抢到红包次数
@@ -69,34 +77,41 @@ public class ApiController {
         if (compareResult == -2L) {
             return R.error(ErrorCodeEume.SOLD_OUT).put("data", null);
         }
-        globalEnvelopeId++;
 
-        // 发送给主题为 snatch-queue 的消息队列
-        Long randomEnvelopeValue = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
-                diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), sentAmout, sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
-        EnvelopeWithoutOpened envelope = new EnvelopeWithoutOpened(globalEnvelopeId, uid, randomEnvelopeValue, compareResult);
+        Long enveLopeId = redisTemplate.opsForHash().increment("global_variable", "envelope_id", 1);
+        Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);
+
+        RLock lock = redissonClient.getLock("lock");  // 分布式锁
+        lock.lock();
+        Integer sentAmout = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");  // TODO Long 和 Integer
+        Long value = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
+                diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), Long.valueOf(sentAmout.toString()), sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
+        redisTemplate.opsForHash().increment("global_variable", "sent_amout", value);
+        lock.unlock();
+        EnvelopeWithoutOpened envelope = new EnvelopeWithoutOpened(enveLopeId, uid, value, compareResult);
+
         rocketMQTemplate.convertAndSend("snatch-queue", envelope);
 
-        if (!redisTemplate.hasKey(uid + "_uid_hash")) {  // 懒创建
+        if (!redisTemplate.hasKey("u_" + uid)) {  // 懒创建
             Map<String, Long> uidHashMap = new HashMap<>();
             uidHashMap.put("cur_count", 0L);
             uidHashMap.put("cur_amount", 0L);
             uidHashMap.put("finished_count", 0L);
             uidHashMap.put("finished_amount", 0L);
-            redisTemplate.opsForHash().putAll(uid + "_uid_hash", uidHashMap);
+            redisTemplate.opsForHash().putAll("u_" + uid, uidHashMap);
         }
-        Long cur_count = redisTemplate.opsForHash().increment(uid + "_uid_hash", "cur_count", 1L);  // 返回新值
-        if (diyConfig.getMaxCount().equals(cur_count)) {
+        Long curCount = redisTemplate.opsForHash().increment("u_" + uid, "cur_count", 1L);  // 返回新值
+        if (diyConfig.getMaxCount().equals(curCount)) {
             redisTemplate.opsForSet().remove("uid_set", uid);
         }
 
         // 创建一个 envelopeId 的 hash
         Map<String, Long> envelopeIdHashMap = new HashMap<>();
         envelopeIdHashMap.put("uid", uid);
-        envelopeIdHashMap.put("value", randomEnvelopeValue);
-        redisTemplate.opsForHash().putAll(globalEnvelopeId + "_envelope_id_hash", envelopeIdHashMap);
+        envelopeIdHashMap.put("value", value);
+        redisTemplate.opsForHash().putAll("e_" + enveLopeId, envelopeIdHashMap);
 
-        return R.ok().put("data", new SnatchResponse(globalEnvelopeId, diyConfig.getMaxCount(), cur_count));
+        return R.ok().put("data", new SnatchResponse(enveLopeId, diyConfig.getMaxCount(), curCount));
     }
 
 
@@ -106,14 +121,17 @@ public class ApiController {
         long envelopeId = Long.parseLong(json.get("envelope_id"));
         log.info("开红包 ==> uid: " + uid + ", envelope_id: " + envelopeId);
 
-        // TODO 这里的返回值应该是 Long 的，但是会报错，所以改成了 Integer 进行比较
-        if (!redisTemplate.hasKey(envelopeId + "_envelope_id_hash") || !(uid == (Integer) redisTemplate.opsForHash().get(envelopeId + "_envelope_id_hash", "uid"))) {
+        // TODO Long 和 Integer
+        if (!redisTemplate.hasKey("e_" + envelopeId) || !(uid == (Integer) redisTemplate.opsForHash().get("e_" + envelopeId, "uid"))) {
             return R.error(ErrorCodeEume.ENVELOPE_NOT_EXIST).put("data", null);
         }
-        // TODO 这里的返回值应该是 Long 的，但是会报错，所以改成了 Integer
-        Integer value = (int) redisTemplate.opsForHash().get(envelopeId + "_envelope_id_hash", "value");
+        // TODO Long 和 Integer
+        Integer value = (int) redisTemplate.opsForHash().get("e_" + envelopeId, "value");
+        redisTemplate.opsForHash().increment("u_" + uid, "cur_amount", value);
+        redisTemplate.delete("e_" + envelopeId);
+
         rocketMQTemplate.convertAndSend("open-queue", new EnvelopeWithoutOpenedAndSnatchTime(envelopeId, uid, Long.parseLong(value.toString())));
-        redisTemplate.delete(envelopeId + "_envelope_id_hash");
+
         return R.ok().put("data", new OpenResponse(Long.parseLong(value.toString())));
     }
 
@@ -121,13 +139,39 @@ public class ApiController {
     @PostMapping("/get_wallet_list")
     public R getWalletList(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));
-        log.info("抢红包 ==> uid: " + uid);
+        log.info("查询余额和红包列表 ==> uid: " + uid);
 
-        Random random = new Random();
-        List<EnvelopeWithoutUid> list = new ArrayList<>();
+        if (!redisTemplate.hasKey("u_" + uid)) {
+            if (!redisTemplate.opsForSet().isMember("uid_set", "u_" + uid)) {
+                return R.error(ErrorCodeEume.INVALID_UID).put("data", new GetWalletListResponse(0L, null));
+            }
+            return R.ok().put("data", new GetWalletListResponse(0L, null));
+        }
 
-        list.add(new EnvelopeWithoutUid(123L, (long) random.nextInt(1000), true, (long) random.nextInt(1000)));
-        list.add(new EnvelopeWithoutUid(123L, null, false, (long) random.nextInt(1000)));
-        return R.ok().put("data", new GetWalletListResponse((long) random.nextInt(1000), list));
+        // TODO Integr 和 Long
+        Integer curCount = (Integer) redisTemplate.opsForHash().get("u_" + uid, "cur_count");
+        Integer curAmount = (Integer) redisTemplate.opsForHash().get("u_" + uid, "cur_amount");
+        Integer finishedCount = (Integer) redisTemplate.opsForHash().get("u_" + uid, "finished_count");
+        Integer finishedAmount = (Integer) redisTemplate.opsForHash().get("u_" + uid, "finished_amount");
+
+        if (!curCount.equals(finishedCount) || !curAmount.equals(finishedAmount)) {
+            return R.error(ErrorCodeEume.SYSTEM_BUSY).put("data", new GetWalletListResponse(0L, null));
+        }
+
+        if (redisTemplate.hasKey("ue_" + uid) && finishedCount + finishedAmount == (Integer) redisTemplate.opsForHash().get("ue_" + uid, "check")) {  // 直接返回缓存
+            return R.ok().put("data", redisTemplate.opsForHash().get("ue_" + uid, "cached_result"));
+        }
+
+        // 去数据库查
+        List<EnvelopeWithoutUid> envelopeList = apiService.selectEnvelopes(uid);
+
+        // 写入缓存（这里我们手动写入缓存，其实可以引入 SpringCache 加一个注解自动实现缓存）
+        Map<String, Object> data = new HashMap<>();
+        data.put("amount", curAmount);
+        data.put("envelope_list", envelopeList);
+        redisTemplate.opsForHash().put("ue_" + uid, "check", finishedCount + finishedAmount);
+        redisTemplate.opsForHash().put("ue_" + uid, "cached_result", new JSONObject(data));
+
+        return R.ok().put("data", new GetWalletListResponse(curAmount.longValue(), envelopeList));
     }
 }

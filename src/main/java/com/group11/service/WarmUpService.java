@@ -9,4 +9,10 @@ import java.util.List;
 public interface WarmUpService {
     // 查询所有 uid
     List<Long> selectAllUsers();
+
+    int truncateUserTable();
+
+    int truncateEnvelopeTable();
+
+    int insertOneRowIntoEnvelopeTable(Long uid);
 }

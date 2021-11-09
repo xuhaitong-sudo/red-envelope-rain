@@ -71,6 +71,11 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.9.1</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
