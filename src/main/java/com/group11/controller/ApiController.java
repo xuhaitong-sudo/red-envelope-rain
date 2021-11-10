@@ -32,7 +32,7 @@ import java.util.*;
 @RequestMapping("/api")
 public class ApiController {
     @Autowired
-    DiyConfig diyConfig;
+    private DiyConfig diyConfig;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
@@ -102,7 +102,7 @@ public class ApiController {
         }
         Long curCount = redisTemplate.opsForHash().increment("u_" + uid, "cur_count", 1L);  // 返回新值
         if (diyConfig.getMaxCount().equals(curCount)) {
-            redisTemplate.opsForSet().remove("uid_set", uid);
+            redisTemplate.opsForSet().remove("uid_set", "u_" + uid);
         }
 
         // 创建一个 envelopeId 的 hash
