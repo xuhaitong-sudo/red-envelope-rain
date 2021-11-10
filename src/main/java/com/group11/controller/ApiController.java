@@ -3,6 +3,7 @@ package com.group11.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.group11.common.config.DiyConfig;
 import com.group11.common.exception.ErrorCodeEume;
+import com.group11.common.limit.AccessLimit;
 import com.group11.common.utils.R;
 import com.group11.common.utils.RandomEnvelopeAmountList;
 import com.group11.pojo.dto.EnvelopeWithoutOpened;
@@ -44,12 +45,13 @@ public class ApiController {
     @Autowired
     private ApiService apiService;
 
+    @AccessLimit(maxCount = 2, seconds = 5)  // 对这个方法进行限流，默认单个 ip 每秒只能最多访问 5 次
     @GetMapping("/hello")
     public String hello() {
         return "服务成功启动";
     }
 
-
+    @AccessLimit
     @PostMapping("/snatch")
     public R snatch(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));
@@ -114,7 +116,7 @@ public class ApiController {
         return R.ok().put("data", new SnatchResponse(enveLopeId, diyConfig.getMaxCount(), curCount));
     }
 
-
+    @AccessLimit
     @PostMapping("/open")
     public R open(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));
@@ -135,7 +137,7 @@ public class ApiController {
         return R.ok().put("data", new OpenResponse(Long.parseLong(value.toString())));
     }
 
-
+    @AccessLimit
     @PostMapping("/get_wallet_list")
     public R getWalletList(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));
