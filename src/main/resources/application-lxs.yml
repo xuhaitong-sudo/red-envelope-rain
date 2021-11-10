@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    username: root
+    password: 654321
+    url: jdbc:mysql://localhost:3306/red-envelope-rain?serverTimezone=UTC&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: Hongbaoyugroup11
+  jackson:
+    default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
+
+rocketmq:
+  nameServer: 127.0.0.1:9876   # 控制面板 127.0.0.1:8001
+  producer:
+    group: group11
+
+
+# 后端服务端口
+server:
+  port: 8080
+
+# 开启 MyBatis 打印 sql 日志
+#logging:
+#  level:
+#    com.group11: debug
+
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+
+# 红包雨的配置，已经上传到配置中心了这里就不需要配置
+#diyconfig:
+#  maxCount: 10
+#  probability: 0.5
+#  maxAmount: 1000
+#  maxEnvelopeCount: 100
+#  lowerLimitAmount: 1
+#  upperLimitAmount: 20
