@@ -19,6 +19,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +50,32 @@ public class ApiController {
     @GetMapping("/hello")
     public String hello() {
         return "服务成功启动";
+    }
+
+    @GetMapping("/top10")
+    public String getTop10() {
+
+        Set<ZSetOperations.TypedTuple<Object>> top10List = redisTemplate.opsForZSet().reverseRangeWithScores("top10", 0, 9);
+        List<int[]> ls = new ArrayList<>();
+        // TODO Long 和 Integer
+        for (ZSetOperations.TypedTuple<Object> objectTypedTuple : top10List) {
+            ls.add(new int[]{(Integer) objectTypedTuple.getValue(), objectTypedTuple.getScore().intValue()});  // uid, cur_amout
+        }
+        if (ls.isEmpty()) {
+            return "暂无排名";
+        }
+        ls.sort((o1, o2) -> {  // 按照红包金额降序排序
+            return o2[1] - o1[1];
+        });
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%-10s%-10s%-10s\n", "rank", "uid", "amount"));
+        for (int i = 0; i < ls.size(); i++) {
+            sb.append(String.format("%-10s%-10s%-10s", i + 1, ls.get(i)[0], ls.get(i)[1]));
+            if (i != ls.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 
     @AccessLimit
@@ -130,6 +157,7 @@ public class ApiController {
         // TODO Long 和 Integer
         Integer value = (int) redisTemplate.opsForHash().get("e_" + envelopeId, "value");
         redisTemplate.opsForHash().increment("u_" + uid, "cur_amount", value);
+        redisTemplate.opsForZSet().incrementScore("top10", uid, value);
         redisTemplate.delete("e_" + envelopeId);
 
         rocketMQTemplate.convertAndSend("open-queue", new EnvelopeWithoutOpenedAndSnatchTime(envelopeId, uid, Long.parseLong(value.toString())));
