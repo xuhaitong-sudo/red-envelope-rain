@@ -39,14 +39,14 @@ public class TestController {
         // TODO Long 和 Integer
         Integer sentAmount = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");
         Long sumOfAllEnvelopeValue = stressTestService.getSumOfAllEnvelopeValue();
-        if (!sentAmount.equals(sumOfAllEnvelopeValue)) {
+        if (!(sumOfAllEnvelopeValue.equals(new Long(sentAmount)))) {
             return "已发出的红包总金额和数据库不一致";
         }
         List<Long> uids = warmUpService.selectAllUsers();
         for (Long uid : uids) {
             Long amountOfAUser = stressTestService.getAmountOfAUser(uid);
             Long sumOfAllOpenedEnvelopeValueForAUser = stressTestService.getSumOfAllOpenedEnvelopeValueForAUser(uid);
-            if (!amountOfAUser.equals(sumOfAllOpenedEnvelopeValueForAUser)) {
+            if (sumOfAllOpenedEnvelopeValueForAUser != null && !amountOfAUser.equals(sumOfAllOpenedEnvelopeValueForAUser)) {
                 return "uid 为 " + uid + " 的已打开红包和用户金额不一致";
             }
         }

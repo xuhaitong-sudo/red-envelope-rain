@@ -64,8 +64,8 @@ public class ApiController {
         if (ls.isEmpty()) {
             return "暂无排名";
         }
-        ls.sort((o1, o2) -> {  // 按照红包金额降序排序
-            return o2[1] - o1[1];
+        ls.sort((o1, o2) -> {  // 先按照红包金额降序排序，再按 uid 升序排序
+            return o2[1] != o1[1] ? o2[1] - o1[1] : o1[0] - o2[0];
         });
         StringBuilder sb = new StringBuilder();
         sb.append(String.format("%-10s%-10s%-10s\n", "rank", "uid", "amount"));
@@ -113,7 +113,7 @@ public class ApiController {
         Integer sentAmout = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");  // TODO Long 和 Integer
         Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);
         Long value = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
-                diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), Long.valueOf(sentAmout.toString()), sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
+                diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), sentAmout.longValue(), sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
         redisTemplate.opsForHash().increment("global_variable", "sent_amout", value);
         lock.unlock();
         EnvelopeWithoutOpened envelope = new EnvelopeWithoutOpened(enveLopeId, uid, value, compareResult);
@@ -142,7 +142,7 @@ public class ApiController {
         return R.ok().put("data", new SnatchResponse(enveLopeId, diyConfig.getMaxCount(), curCount));
     }
 
-    @AccessLimit
+    //    @AccessLimit
     @PostMapping("/open")
     public R open(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));

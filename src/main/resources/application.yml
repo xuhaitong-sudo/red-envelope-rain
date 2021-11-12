@@ -17,6 +17,7 @@ rocketmq:
   nameServer: 47.111.171.173:9876   # 控制面板 47.111.171.173:8001
   producer:
     group: group11
+    send-message-timeout: 60000  # 防止发送信息给消息队列超时
 
 
 # 后端服务端口
