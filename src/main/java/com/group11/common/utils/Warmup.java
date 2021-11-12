@@ -42,7 +42,7 @@ public class Warmup {
     private void mySQLInit() {
         warmUpService.truncateEnvelopeTable();
         warmUpService.truncateUserTable();
-        for (long i = 1; i <= 200; i++) {
+        for (long i = 1; i <= 10; i++) {
             warmUpService.insertOneRowIntoEnvelopeTable(i);  // 有批量操作的写法，这里就直接循环方便阅读了
         }
     }
@@ -92,7 +92,7 @@ public class Warmup {
         }
     }
 
-    @PostConstruct  // 使用 @PostConstruct 在 web 服务启动前进行预热
+//    @PostConstruct  // 使用 @PostConstruct 在 web 服务启动前进行预热
     public void warmup() {
         mySQLInit();
         redisInit();

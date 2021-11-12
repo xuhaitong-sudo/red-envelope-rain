@@ -15,8 +15,6 @@ import com.group11.pojo.vo.SnatchResponse;
 import com.group11.service.ApiService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -24,6 +22,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Xu Haitong
@@ -38,8 +37,6 @@ public class ApiController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
-    private RedissonClient redissonClient;
-    @Autowired
     private DefaultRedisScript<Long> redisScript;
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
@@ -49,7 +46,7 @@ public class ApiController {
     @AccessLimit(maxCount = 20, seconds = 1)  // 对这个方法进行限流，默认单个 ip 每秒只能最多访问 5 次
     @GetMapping("/hello")
     public String hello() {
-        return "服务成功启动";
+        return "服务成功启动\n";
     }
 
     @GetMapping("/top10")
@@ -62,7 +59,7 @@ public class ApiController {
             ls.add(new int[]{(Integer) objectTypedTuple.getValue(), objectTypedTuple.getScore().intValue()});  // uid, cur_amout
         }
         if (ls.isEmpty()) {
-            return "暂无排名";
+            return "暂无排名\n";
         }
         ls.sort((o1, o2) -> {  // 先按照红包金额降序排序，再按 uid 升序排序
             return o2[1] != o1[1] ? o2[1] - o1[1] : o1[0] - o2[0];
@@ -78,9 +75,9 @@ public class ApiController {
         return sb.toString();
     }
 
-    //    @AccessLimit
+    @AccessLimit
     @PostMapping("/snatch")
-    public R snatch(@RequestBody Map<String, String> json) {
+    public R snatch(@RequestBody Map<String, String> json) throws InterruptedException {
         long uid = Long.parseLong(json.get("uid"));
         log.info("抢红包 ==> uid: " + uid);
 
@@ -108,14 +105,15 @@ public class ApiController {
 
         Long enveLopeId = redisTemplate.opsForHash().increment("global_variable", "envelope_id", 1);
 
-        RLock lock = redissonClient.getLock("lock");  // 分布式锁
-        lock.lock();
+        while (!redisTemplate.opsForValue().setIfAbsent("lock", 1, 600, TimeUnit.SECONDS)) {
+            Thread.sleep(10);
+        }
         Integer sentAmout = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");  // TODO Long 和 Integer
         Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);
         Long value = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
                 diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), sentAmout.longValue(), sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
         redisTemplate.opsForHash().increment("global_variable", "sent_amout", value);
-        lock.unlock();
+        redisTemplate.delete("lock");
         EnvelopeWithoutOpened envelope = new EnvelopeWithoutOpened(enveLopeId, uid, value, compareResult);
 
         rocketMQTemplate.convertAndSend("snatch-queue", envelope);
@@ -142,7 +140,7 @@ public class ApiController {
         return R.ok().put("data", new SnatchResponse(enveLopeId, diyConfig.getMaxCount(), curCount));
     }
 
-    //    @AccessLimit
+    @AccessLimit
     @PostMapping("/open")
     public R open(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));

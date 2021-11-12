@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Xu Haitong
  * @since 2021/11/9 20:28
  */
-@Configuration
+//@Configuration
 public class RedissonConfig {
     @Value("${spring.redis.host}")
     private String redisHost;
@@ -25,7 +25,7 @@ public class RedissonConfig {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort)
                 .setSubscriptionsPerConnection(10)
-//                .setPassword("Hongbaoyugroup11")
+                .setPassword("Hongbaoyugroup11")
                 .setSubscriptionConnectionPoolSize(100)
                 .setPingConnectionInterval(1000);
         return Redisson.create(config);

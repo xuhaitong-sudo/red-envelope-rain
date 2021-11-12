@@ -6,37 +6,37 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
   redis:
-    #    host: redis-cn02s9iq47d3t41bs.redis.volces.com
-    host: 47.111.171.173
+    host: redis-cn02qjnd8d9yq22gs.redis.ivolces.com
     port: 6379
-  #    password: Hongbaoyugroup11
+    password: Hongbaoyugroup11
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 
 rocketmq:
-  nameServer: 47.111.171.173:9876   # 控制面板 47.111.171.173:8001
+  nameServer: http://MQ_INST_8149062485579066312_4393116568.cn-beijing.rocketmq-internal.ivolces.com:24009   # 控制面板 47.111.171.173:8001
+  consumer:
+    access-key: OUuDDgbKHwHdv2R4WMT9PNSf
+    secret-key: cFssJutAiCZcID51xuuN29p3
   producer:
     group: group11
     send-message-timeout: 60000  # 防止发送信息给消息队列超时
+    access-key: OUuDDgbKHwHdv2R4WMT9PNSf
+    secret-key: cFssJutAiCZcID51xuuN29p3
 
 
 # 后端服务端口
 server:
   port: 8080
 
-# 开启 MyBatis 打印 sql 日志
-#logging:
-#  level:
-#    com.group11: debug
-
 mybatis:
   mapper-locations: classpath:/mapper/*.xml
 
 # 红包雨的配置，已经上传到配置中心了这里就不需要配置
 #diyconfig:
-#  maxCount: 10
-#  probability: 0.5
-#  maxAmount: 1000
-#  maxEnvelopeCount: 100
+#  maxCount: 3
+#  probability: 1.0
+#  maxAmount: 10000
+#  maxEnvelopeCount: 1000
 #  lowerLimitAmount: 1
 #  upperLimitAmount: 20
+#  startTime: 0

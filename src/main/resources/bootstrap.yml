@@ -4,5 +4,5 @@ spring:
   cloud:
     nacos:
       config:
-        server-addr: 47.111.171.173:8848  # 控制面板 47.111.171.173:8848/nacos
+        server-addr: 111.62.122.90:8848  # 控制面板 111.62.122.90:8848/nacos
         file-extension: yaml
