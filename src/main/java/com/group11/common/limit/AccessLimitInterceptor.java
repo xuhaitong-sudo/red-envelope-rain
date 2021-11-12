@@ -43,7 +43,7 @@ public class AccessLimitInterceptor implements HandlerInterceptor {
                 return true;
             }
             if (count > maxCount) {  // 进行拒绝
-                R r = R.error(ErrorCodeEume.SYSTEM_BUSY).put("data", null);
+                R r = R.error(ErrorCodeEume.ACCESS_LIMIT).put("data", null);
                 OutputStream out = response.getOutputStream();
                 out.write(JSON.toJSONString(r).getBytes("UTF-8"));
                 out.flush();

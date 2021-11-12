@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * 带上下限的红包分配算法（这里把原文所有的 int 都改成了 long）
+ * 带上下限的红包分配算法
  * 见 https://www.cnblogs.com/hanganglin/p/6496422.html
  * 本项目需要使用的 API 是 randomBonusWithSpecifyBound
  *

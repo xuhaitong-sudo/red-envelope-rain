@@ -13,7 +13,8 @@ public enum ErrorCodeEume {
     FAILURE_SNATCH(3, "未抢到红包"),
     SOLD_OUT(4, "红包发光了"),
     ENVELOPE_NOT_EXIST(5, "红包不存在"),
-    SYSTEM_BUSY(6, "系统繁忙");
+    SYSTEM_BUSY(6, "系统繁忙"),
+    ACCESS_LIMIT(7, "操作过快，请稍后再试");
 
     private int code;
     private String msg;

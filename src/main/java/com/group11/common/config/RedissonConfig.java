@@ -23,7 +23,11 @@ public class RedissonConfig {
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort).setPassword("Hongbaoyugroup11");
+        config.useSingleServer().setAddress("redis://" + redisHost + ":" + redisPort)
+                .setSubscriptionsPerConnection(10)
+//                .setPassword("Hongbaoyugroup11")
+                .setSubscriptionConnectionPoolSize(100)
+                .setPingConnectionInterval(1000);
         return Redisson.create(config);
     }
 }

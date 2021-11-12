@@ -42,7 +42,7 @@ public class Warmup {
     private void mySQLInit() {
         warmUpService.truncateEnvelopeTable();
         warmUpService.truncateUserTable();
-        for (long i = 1; i <= 20; i++) {
+        for (long i = 1; i <= 200; i++) {
             warmUpService.insertOneRowIntoEnvelopeTable(i);  // 有批量操作的写法，这里就直接循环方便阅读了
         }
     }

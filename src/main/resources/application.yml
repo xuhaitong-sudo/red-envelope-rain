@@ -6,9 +6,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
   redis:
-    host: redis-cn02s9iq47d3t41bs.redis.volces.com
+    #    host: redis-cn02s9iq47d3t41bs.redis.volces.com
+    host: 47.111.171.173
     port: 6379
-    password: Hongbaoyugroup11
+  #    password: Hongbaoyugroup11
   jackson:
     default-property-inclusion: NON_EMPTY  # 如果 opened 是 false 则 value 不传给前端
 

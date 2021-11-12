@@ -46,7 +46,7 @@ public class ApiController {
     @Autowired
     private ApiService apiService;
 
-    @AccessLimit(maxCount = 2, seconds = 5)  // 对这个方法进行限流，默认单个 ip 每秒只能最多访问 5 次
+    @AccessLimit(maxCount = 20, seconds = 1)  // 对这个方法进行限流，默认单个 ip 每秒只能最多访问 5 次
     @GetMapping("/hello")
     public String hello() {
         return "服务成功启动";
@@ -78,7 +78,7 @@ public class ApiController {
         return sb.toString();
     }
 
-    @AccessLimit
+    //    @AccessLimit
     @PostMapping("/snatch")
     public R snatch(@RequestBody Map<String, String> json) {
         long uid = Long.parseLong(json.get("uid"));
@@ -91,8 +91,7 @@ public class ApiController {
             return R.error(ErrorCodeEume.MAX_COUNT).put("data", null);                           // 当前用户已达最大抢到红包次数
         }
 
-        Random random = new Random();
-        if (random.nextInt(100) + 1 > 100 * diyConfig.getProbability()) {
+        if (Math.random() > diyConfig.getProbability()) {
             return R.error(ErrorCodeEume.FAILURE_SNATCH).put("data", null);
         }
 
@@ -108,11 +107,11 @@ public class ApiController {
         }
 
         Long enveLopeId = redisTemplate.opsForHash().increment("global_variable", "envelope_id", 1);
-        Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);
 
         RLock lock = redissonClient.getLock("lock");  // 分布式锁
         lock.lock();
         Integer sentAmout = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");  // TODO Long 和 Integer
+        Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);
         Long value = RandomEnvelopeAmountList.randomBonusWithSpecifyBound(
                 diyConfig.getMaxAmount(), diyConfig.getMaxEnvelopeCount(), Long.valueOf(sentAmout.toString()), sentEnvelopeCount, diyConfig.getLowerLimitAmount(), diyConfig.getUpperLimitAmount());
         redisTemplate.opsForHash().increment("global_variable", "sent_amout", value);
