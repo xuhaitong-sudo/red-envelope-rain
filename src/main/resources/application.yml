@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
   redis:
-    host: redis-cn02qjnd8d9yq22gs.redis.ivolces.com
+    host: redis-cn02o3x2jgx89bk8x.redis.ivolces.com
     port: 6379
     password: Hongbaoyugroup11
   jackson:
