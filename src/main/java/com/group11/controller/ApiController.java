@@ -106,7 +106,7 @@ public class ApiController {
         Long enveLopeId = redisTemplate.opsForHash().increment("global_variable", "envelope_id", 1);
 
         while (!redisTemplate.opsForValue().setIfAbsent("lock", 1, 600, TimeUnit.SECONDS)) {
-            Thread.sleep(10);
+            // 自旋
         }
         Integer sentAmout = (Integer) redisTemplate.opsForHash().get("global_variable", "sent_amout");  // TODO Long 和 Integer
         Long sentEnvelopeCount = redisTemplate.opsForHash().increment("global_variable", "sent_envelope_count", 1);

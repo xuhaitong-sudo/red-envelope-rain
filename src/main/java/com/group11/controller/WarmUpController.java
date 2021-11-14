@@ -19,6 +19,7 @@ public class WarmUpController {
 
     @RequestMapping("/clear-and-warm-up")
     public String warmUp() {
+        log.info("清除之前的数据并进行预热");
         warmup.warmup();
         return "预热成功\n";
     }

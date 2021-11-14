@@ -3,6 +3,7 @@ package com.group11.common.utils;
 import com.google.common.collect.Sets;
 import com.group11.common.config.DiyConfig;
 import com.group11.service.WarmUpService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -10,7 +11,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 2021/11/8 15:53
  */
 @Component
+@Slf4j
 public class Warmup {
     @Autowired
     RedisTemplate<String, Object> redisTemplate;
@@ -42,7 +43,7 @@ public class Warmup {
     private void mySQLInit() {
         warmUpService.truncateEnvelopeTable();
         warmUpService.truncateUserTable();
-        for (long i = 1; i <= 10; i++) {
+        for (long i = 1; i <= 100; i++) {
             warmUpService.insertOneRowIntoEnvelopeTable(i);  // 有批量操作的写法，这里就直接循环方便阅读了
         }
     }
@@ -92,9 +93,13 @@ public class Warmup {
         }
     }
 
-//    @PostConstruct  // 使用 @PostConstruct 在 web 服务启动前进行预热
+    //    @PostConstruct  // 使用 @PostConstruct 在 web 服务启动前进行预热
     public void warmup() {
+        log.info("开始初始化 MySQL");
         mySQLInit();
+        log.info("成功初始化 MySQL");
+        log.info("开始初始化 Redis");
         redisInit();
+        log.info("成功初始化 Redis");
     }
 }
