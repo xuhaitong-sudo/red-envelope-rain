@@ -31,6 +31,7 @@
                snatch_time                                 as snatchTime
         from t_envelope
         where uid = #{uid}
+        order by snatch_time
     </select>
 
 </mapper>
